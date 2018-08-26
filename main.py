@@ -15,15 +15,15 @@ targetSeriesURL = argv[1] # get the target url page
 siteData = scraper.get(targetSeriesURL).content
 soup = bs4.BeautifulSoup(siteData)
 
-linksList = {}
+linksList = []
 
 # goes through the digest and checks if the returned urls are valid 
 # yes crude but works very well. 
 for link in soup.find_all('a'):
     tempLink = link.get('href')
 
-    if tempLink.contains('ww8'):
-    	linksList.add(tempLink)
+    if 'ww8' in tempLink:
+    	linksList.append(tempLink)
 
 
 for url in linksList:
