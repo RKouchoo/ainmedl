@@ -16,5 +16,6 @@ site = scraper.get(targetSeriesURL).content
 
 soup = bs4.BeautifulSoup(site)
 
-for link in soup.find_all('table class=listing'):
+for link in soup.find_all('a'):
     print(link.get('href'))
+
