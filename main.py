@@ -7,15 +7,24 @@ from sys import argv
 scraper = cfscrape.create_scraper()
 
 targetSeriesURL = argv[1] # get the target url page
-#targetDir = argv[2] # get the input target directory
+#targetDir = argv[2] # get the input target directory to store the videos
 
-matchingStrsPerSite = {"<a href="} # first string is used in http://ww8.kiss-anime.me
+# first string is used in http://ww8.kiss-anime.me
 # test url "http://ww8.kiss-anime.me/Anime/30-sai-no-hoken-taiiku"
 
-site = scraper.get(targetSeriesURL).content
+siteData = scraper.get(targetSeriesURL).content
+soup = bs4.BeautifulSoup(siteData)
 
-soup = bs4.BeautifulSoup(site)
+linksList = {}
 
+# goes through the digest and checks if the returned urls are valid 
+# yes crude but works very well. 
 for link in soup.find_all('a'):
-    print(link.get('href'))
+    tempLink = link.get('href')
 
+    if tempLink.contains('ww8'):
+    	linksList.add(tempLink)
+
+
+for url in linksList:
+	print(url)
