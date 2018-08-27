@@ -100,8 +100,8 @@ for i in range(0, listLen):
         if currentDlLink == "" or currentDlLink == "none":
             print("Failed to find video download data for: " + currentLink)
             # add to the retry list so that the video gets run through again.
-            retryList.append(i)
-            print("Added: " + linksList[i] + " to the retry list")
+            retryList.append(linksList[i])
+            print("Added: " + linksList[i] + " to the retry que")
             print("\n")
 
     i += 1
@@ -110,7 +110,7 @@ if retryList:
     print("Retrying to download failed videos!")
 
     for x in range(0, len(retryList)):
-        currentLink = linksList[retryList[x]]
+        currentLink = linksList[x]
 
         print("[RETRY] Getting video data from: " + currentLink)
         print("[RETRY] Sleeping for " + str(DDOS_SLEEP_TIME) + " seconds to bypass DDOS/bot protection.")
@@ -122,10 +122,11 @@ if retryList:
             mainDriver.get(currentLink)
             sleep(DDOS_SLEEP_TIME)
         except TimeoutException:
-            mainDriver.find_element_by_tag_name("body").send_keys("Keys.ESCAPE");
+            #mainDriver.find_element_by_tag_name("body").send_keys("Keys.ESCAPE");
             thisSiteData = mainDriver.page_source
         except UnexpectedAlertPresentException:
-            mainDriver.find_element_by_tag_name("body").send_keys("Keys.ESCAPE");
+            #mainDriver.find_element_by_tag_name("body").send_keys("Keys.ESCAPE");
+            mainDriver.switch_to_alert().dismiss()
             thisSiteData = mainDriver.page_source
 
         newSoup = bs4.BeautifulSoup(thisSiteData, 'html.parser')
@@ -156,4 +157,4 @@ def doDownload(links, path):
         print("\nDownloaded: " + fName)
 
 
-doDownload(downloadURLList, targetDir)
+#doDownload(downloadURLList, targetDir)
