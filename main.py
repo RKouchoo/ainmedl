@@ -2,13 +2,26 @@ import cfscrape
 import bs4
 import requests
 import re
+import selenium
+import os
 
+from time import sleep
 from sys import argv
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+
+chromeOptions = webdriver.ChromeOptions()  
+chromeOptions.add_argument("--headless")  
+chromeOptions.add_argument('--ignore-certificate-errors')
+
+DDOS_SLEEP_TIME = 10
 
 scraper = cfscrape.create_scraper()
 
 targetSeriesURL = argv[1] # get the target url page
-#targetDir = argv[2] # get the input target directory to store the videos
+targetDir = argv[2] # get the input target directory to store the videos
 
 # first string is used in http://ww8.kiss-anime.me
 # test url "http://ww8.kiss-anime.me/Anime/30-sai-no-hoken-taiiku"
@@ -33,21 +46,28 @@ linksList.reverse()
 # each iteration should create a new bs and scraper to view the download link of each page.
 listLen = len(linksList)
 
+# create an instance of chrome
+mainDriver = webdriver.Chrome(chrome_options=chromeOptions, service_log_path = os.path.devnull)
+
 for i in range(0, listLen):
 	currentLink = linksList[i]
-	print("Downloading video from: " + currentLink)
+	print("Downloading video from: " + currentLink)	
+	print("Sleeping for " + str(DDOS_SLEEP_TIME) + " seconds to bypass DDOS protection")
+	
+	mainDriver.get(currentLink)
+	sleep(DDOS_SLEEP_TIME)
+	mainDriver.find_element_by_tag_name("body").send_keys("Keys.ESCAPE");
 
-	thisSiteData = scraper.get(currentLink).content
+	thisSiteData = mainDriver.page_source	
+
 	newSoup = bs4.BeautifulSoup(thisSiteData, 'html.parser')
+	divD = newSoup.find_all('div', {'id':'divDownload'})
 
-	tags = newSoup.find('div', id="container")
+	try:
+		dLink = divD[0].a.get('href')
+		print(dLink)
 
-	for tag in tags.find_all('div'):
-		print(tag)
+	except:
+		print("failed to find video download link")
 
 	i += 1
-'''
-	for dlLink in newSoup.findAll('a'):
-		#theLink = dlLink.get('href')
-		print(dlLink)
-'''
