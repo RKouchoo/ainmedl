@@ -4,6 +4,7 @@ import requests
 import re
 import selenium
 import os
+import urllib
 
 from time import sleep
 from sys import argv
@@ -11,15 +12,19 @@ from sys import argv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.alert import Alert
 from selenium.common.exceptions import TimeoutException 
+from selenium.common.exceptions import NoAlertPresentException
+from selenium.common.exceptions import UnexpectedAlertPresentException
 
 chromeOptions = webdriver.ChromeOptions()  
 chromeOptions.add_argument("--headless")  
 chromeOptions.add_argument('--ignore-certificate-errors')
 chromeOptions.add_argument("--log-level=3");
 chromeOptions.add_argument("--silent");
+chromeOptions.add_argument("--disable-notifications")
 
-DDOS_SLEEP_TIME = 12
+DDOS_SLEEP_TIME = 10
 
 scraper = cfscrape.create_scraper()
 
@@ -55,64 +60,98 @@ mainDriver = webdriver.Chrome(chrome_options=chromeOptions, service_log_path=os.
 
 # create an empty list to retry downloading a failed video.
 retryList = []
+downloadURLList = []
 
 for i in range(0, listLen):
-	
 	currentLink = linksList[i]
-	print("Downloading video from: " + currentLink)	
-	print("Sleeping for " + str(DDOS_SLEEP_TIME) + " seconds to bypass DDOS protection")
+	print("Getting download data from video: " + currentLink)	
+	print("Sleeping for " + str(DDOS_SLEEP_TIME) + " seconds to bypass DDOS/bot protection.")
+	
+	# set the max load time to avoid infinite loading
 	mainDriver.set_page_load_timeout(DDOS_SLEEP_TIME)
 
 	thisSiteData = ""
 
+	# handle the infinite load on the site
 	try:
 		mainDriver.get(currentLink)
 		sleep(DDOS_SLEEP_TIME)
 	except TimeoutException:
 		mainDriver.find_element_by_tag_name("body").send_keys("Keys.ESCAPE");
-		thisSiteData = mainDriver.page_source	
-		
+		thisSiteData = mainDriver.page_source		
+	except UnexpectedAlertPresentException:
+		#mainDriver.wait_for_and_accept_alert()
+		mainDriver.find_element_by_tag_name("body").send_keys("Keys.ESCAPE");
+		thisSiteData = mainDriver.page_source
+		downloadURLList.append(currentDlLink)
+		currentDlLink = ""
+
 	newSoup = bs4.BeautifulSoup(thisSiteData, 'html.parser')
 	divD = newSoup.find_all('div', {'id':'divDownload'})
+	currentDlLink = ""
 
 	try:
-		dLink = divD[0].a.get('href')
-		print("Found download link..")
+		currentDlLink = divD[0].a.get('href')
+		print("Found download link.. " + currentDlLink[17:40]) # show a snippet of the download link
+		print("\n")
+		downloadURLList.append(currentDlLink)
+		currentDlLink = ""
 	except:
-		print("failed to find video download link")
-		# add to the retry list so that the video gets run through again.
-		retryList.append(i)
-		print("Added: " + linksList[i] + " to the retry list")
+		if currentDlLink == "" or currentDlLink == "none":
+			print("Failed to find video download data for: " + currentLink)
+			# add to the retry list so that the video gets run through again.
+			retryList.append(i - 1)
+			print("Added: " + linksList[i] + " to the retry list")
+			print("\n")
+
 	i += 1
 
-for x in range(0, len(retryList)):
-	currentLink = linksList[retryList[x]]
-	print("Retrying to download failed videos!")
 
-	print("[RETRY] Downloading video from: " + currentLink)	
-	print("Sleeping for " + str(DDOS_SLEEP_TIME) + " seconds to bypass DDOS protection")
-	mainDriver.set_page_load_timeout(DDOS_SLEEP_TIME)
+if retryList:
+	print("\nRetrying to download failed videos!")
 
-	thisSiteData = ""
+	for x in range(0, len(retryList)):
+		currentLink = linksList[retryList[x]]
 
-	try:
-		mainDriver.get(currentLink)
-		sleep(DDOS_SLEEP_TIME)
-	except TimeoutException:
-		mainDriver.find_element_by_tag_name("body").send_keys("Keys.ESCAPE");
-		thisSiteData = mainDriver.page_source	
+		print("[RETRY] Getting video data from: " + currentLink)	
+		print("[RETRY] Sleeping for " + str(DDOS_SLEEP_TIME) + " seconds to bypass DDOS/bot protection.")
+		mainDriver.set_page_load_timeout(DDOS_SLEEP_TIME)
+
+		thisSiteData = ""
+
+		try:
+			mainDriver.get(currentLink)
+			sleep(DDOS_SLEEP_TIME)
+		except TimeoutException:
+			mainDriver.find_element_by_tag_name("body").send_keys("Keys.ESCAPE");
+			thisSiteData = mainDriver.page_source
+			downloadURLList.append(currentDlLink)
+			currentDlLink = ""
+		except UnexpectedAlertPresentException:
+			#mainDriver.wait_for_and_accept_alert()
+			mainDriver.find_element_by_tag_name("body").send_keys("Keys.ESCAPE");
+			thisSiteData = mainDriver.page_source
+			downloadURLList.append(currentDlLink)
+			currentDlLink = ""
 		
-	newSoup = bs4.BeautifulSoup(thisSiteData, 'html.parser')
-	divD = newSoup.find_all('div', {'id':'divDownload'})
+		newSoup = bs4.BeautifulSoup(thisSiteData, 'html.parser')
+		divD = newSoup.find_all('div', {'id':'divDownload'})
 
-	try:
-		dLink = divD[0].a.get('href')
-		print("Found download link..")
+		try:
+			currentDlLink = divD[0].a.get('href')
+			print("[RETRY] Found download link.. " + currentDlLink[17:40])
+			downloadURLList.append(currentDlLink)
+		except:
+			print("[RETRY] Failed to find video download link...")
+			print("[RETRY] Video may of been taken down!")
+			sleep(2)
+		x += 1
 
-	except:
-		print("failed to find video download link...")
-		print("Video may of been taken down!")
-		sleep(2)
-	x += 1
+print("Sucsessfully found download links: ")
+for a in downloadURLList:
+	print(a)
 
-#def doDownload(link, path):
+def doDownload(link):
+	print("http://ww8.kiss-anime.me/" + link)
+	urllib.request.urlretrieve("http://ww8.kiss-anime.me/" + link, "test.mp4")
+
