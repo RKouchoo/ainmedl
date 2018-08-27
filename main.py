@@ -1,11 +1,8 @@
 import cfscrape
 import bs4
-import requests
-import re
 import selenium
 import os
 import wget
-
 
 from time import sleep
 from sys import argv
@@ -63,11 +60,10 @@ mainDriver = webdriver.Chrome(chrome_options=chromeOptions, service_log_path=os.
 # create an empty list to retry downloading a failed video.
 retryList = []
 downloadURLList = []
+firstRun = True
 
 for i in range(0, listLen):
 	currentLink = linksList[i]
-	print("Getting download data from video: " + currentLink)	
-	print("Sleeping for " + str(DDOS_SLEEP_TIME) + " seconds to bypass DDOS/bot protection.")
 	
 	# set the max load time to avoid infinite loading
 	mainDriver.set_page_load_timeout(DDOS_SLEEP_TIME)
@@ -76,17 +72,26 @@ for i in range(0, listLen):
 
 	# handle the infinite load on the site
 	try:
+		if firstRun:
+			print("Sleeping for " + str(DDOS_SLEEP_TIME) + " seconds to bypass DDOS/bot protection.")
+			sleep(DDOS_SLEEP_TIME) # we need to wait for cloudflares protection to run through
+			firstRun = False
+
+		if not firstRun:
+			mainDriver.set_page_load_timeout(1)
+
 		mainDriver.get(currentLink)
-		sleep(DDOS_SLEEP_TIME)
+
+		print("Getting download data from video: " + currentLink)	
+	
 	except TimeoutException:
-		mainDriver.find_element_by_tag_name("body").send_keys("Keys.ESCAPE");
+		#mainDriver.find_element_by_tag_name("body").send_keys("Keys.ESCAPE");
 		thisSiteData = mainDriver.page_source		
+	
 	except UnexpectedAlertPresentException:
 		#mainDriver.wait_for_and_accept_alert()
 		mainDriver.find_element_by_tag_name("body").send_keys("Keys.ESCAPE");
 		thisSiteData = mainDriver.page_source
-		downloadURLList.append(currentDlLink)
-		currentDlLink = ""
 
 	newSoup = bs4.BeautifulSoup(thisSiteData, 'html.parser')
 	divD = newSoup.find_all('div', {'id':'divDownload'})
@@ -110,7 +115,7 @@ for i in range(0, listLen):
 
 
 if retryList:
-	print("\nRetrying to download failed videos!")
+	print("Retrying to download failed videos!")
 
 	for x in range(0, len(retryList)):
 		currentLink = linksList[retryList[x]]
@@ -127,14 +132,11 @@ if retryList:
 		except TimeoutException:
 			mainDriver.find_element_by_tag_name("body").send_keys("Keys.ESCAPE");
 			thisSiteData = mainDriver.page_source
-			downloadURLList.append(currentDlLink)
-			currentDlLink = ""
 		except UnexpectedAlertPresentException:
 			#mainDriver.wait_for_and_accept_alert()
 			mainDriver.find_element_by_tag_name("body").send_keys("Keys.ESCAPE");
 			thisSiteData = mainDriver.page_source
-			downloadURLList.append(currentDlLink)
-			currentDlLink = ""
+
 		
 		newSoup = bs4.BeautifulSoup(thisSiteData, 'html.parser')
 		divD = newSoup.find_all('div', {'id':'divDownload'})
@@ -151,11 +153,12 @@ if retryList:
 
 print("Sucsessfully found download links: ")
 for a in downloadURLList:
-	print(a)
+	print("http://ww8.kiss-anime.me" + a)
 
 def doDownload(links, path):
 	for link in links:
-		fName = wget.download(url=link, out=path, bar=bar_thermometer)
+		newLink = "http://ww8.kiss-anime.me" + link
+		fName = wget.download(url=newLink)
 		print("Downloaded: " + fName)
 
 doDownload(downloadURLList, targetDir)
