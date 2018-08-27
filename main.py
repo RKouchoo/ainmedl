@@ -4,7 +4,8 @@ import requests
 import re
 import selenium
 import os
-import urllib
+import wget
+
 
 from time import sleep
 from sys import argv
@@ -20,9 +21,10 @@ from selenium.common.exceptions import UnexpectedAlertPresentException
 chromeOptions = webdriver.ChromeOptions()  
 chromeOptions.add_argument("--headless")  
 chromeOptions.add_argument('--ignore-certificate-errors')
-chromeOptions.add_argument("--log-level=3");
-chromeOptions.add_argument("--silent");
+chromeOptions.add_argument("--log-level=3")
+chromeOptions.add_argument("--silent")
 chromeOptions.add_argument("--disable-notifications")
+chromeOptions.add_argument("--mute-audio") # some really bitchy ads sometimes come by....
 
 DDOS_SLEEP_TIME = 10
 
@@ -100,7 +102,7 @@ for i in range(0, listLen):
 		if currentDlLink == "" or currentDlLink == "none":
 			print("Failed to find video download data for: " + currentLink)
 			# add to the retry list so that the video gets run through again.
-			retryList.append(i - 1)
+			retryList.append(i)
 			print("Added: " + linksList[i] + " to the retry list")
 			print("\n")
 
@@ -151,7 +153,9 @@ print("Sucsessfully found download links: ")
 for a in downloadURLList:
 	print(a)
 
-def doDownload(link):
-	print("http://ww8.kiss-anime.me/" + link)
-	urllib.request.urlretrieve("http://ww8.kiss-anime.me/" + link, "test.mp4")
+def doDownload(links, path):
+	for link in links:
+		fName = wget.download(url=link, out=path, bar=bar_thermometer)
+		print("Downloaded: " + fName)
 
+doDownload(downloadURLList, targetDir)
