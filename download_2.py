@@ -33,7 +33,7 @@ def moveVideosToSelectedDir(dir):
 def getDownloadFromUrl(url):
     print("Getting video meta-data for the url: {}".format(url))
     kissAnimeInterface = get_anime_class('kissanime')
-    currentAnime = kissAnimeInterface(url, quality="360p")
+    currentAnime = kissAnimeInterface(url, quality="480p")
     currentAnimeName = currentAnime.title
 
     episodes = len(currentAnime)
