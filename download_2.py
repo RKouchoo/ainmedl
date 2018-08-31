@@ -1,7 +1,7 @@
 import os
 from sys import argv
 
-from anime_downloader import get_anime_class
+from anime_downloader.sites import get_anime_class
 
 # Class refrence: https://github.com/vn-ki/anime-downloader/wiki/Package-documentation
 
@@ -33,7 +33,7 @@ def moveVideosToSelectedDir(dir):
 def getDownloadFromUrl(url):
     print("Getting video meta-data for the url: {}".format(url))
     kissAnimeInterface = get_anime_class('kissanime')
-    currentAnime = kissAnimeInterface(url)
+    currentAnime = kissAnimeInterface(url, quality="360p")
     currentAnimeName = currentAnime.title
 
     episodes = len(currentAnime)
