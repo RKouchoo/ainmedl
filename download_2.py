@@ -23,9 +23,6 @@ def getVideoFileList(dir):
 
 def writeYAMLStringToFile(name, string):
     with open(name + '.yaml', "w+") as textFile:
-        sys.stdout.flush()
-        sys.stdout.write("\n Writing out cache file: {} ".format(name))
-        sys.stdout.flush()
         textFile.write(string)
 
 
@@ -40,13 +37,13 @@ def checkForAnimeYamlFile(dir):
     yamlFiles = []
     
     for yaml in files:
-        if "yaml" = yaml:
+        if "yaml" == yaml:
             yamlFiles.append(yaml)
 
     return yamlFiles
 
 
- def readYAMLFile(filePath):
+def readYAMLFile(filePath):
     fileData = open(filePath, 'r')
     return fileData.read()
 
@@ -62,7 +59,7 @@ def getCurrentEpisodeFromYaml(yamls, animName):
         animObject = fromYAMLString(data)
 
         # check if the file has the correct name
-        if animObject.memName = animName:
+        if animObject.memName == animName:
             # we have the correct anime json file found
             pos = animObject.memCurrent
         else:
@@ -91,6 +88,19 @@ def getDownloadFromUrl(url):
     currentAnimeName = currentAnime.title
 
     episodes = len(currentAnime)
+    files = checkForAnimeYamlFile("/")
+
+
+    if files:
+        episodeNum = getCurrentEpisodeFromYaml(files, currentAnime)
+    else:
+        episodeNum = -1
+
+    if episodeNum == -1:
+        # do a normal download as there is not a cache file here
+    else:
+        # download from the current episode, rewriting the latest one just incase it is corrupt.
+
     print("Found {} videos in this series to download. \n".format(episodes))
     print("Downloading {} episdoes. This may take some time!".format(episodes))
     redownload = []
