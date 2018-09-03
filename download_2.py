@@ -3,9 +3,12 @@ import yaml
 from sys import argv
 from anime_downloader.sites import get_anime_class
 
+import animeDataStore
+
 # Class refrence: https://github.com/vn-ki/anime-downloader/wiki/Package-documentation
 
 targetSeriesURL = argv[1]  # the target series to index and download
+
 
 def getVideoFileList(dir):
     path, dirs, files = next(os.walk(dir))
@@ -16,6 +19,57 @@ def getVideoFileList(dir):
             videoFiles.append(file)
 
     return videoFiles
+
+
+def writeYAMLStringToFile(name, string):
+    with open(name + '.yaml', "w+") as textFile:
+        sys.stdout.flush()
+        sys.stdout.write("\n Writing out cache file: {} ".format(name))
+        sys.stdout.flush()
+        textFile.write(string)
+
+
+def generateYAMLString(animName, animLength, current):
+    data = animeDataStore.animeInfo(animName, animLength, current)
+
+    return yaml.dump(data)
+
+
+def checkForAnimeYamlFile(dir):
+    path, dirs, files = next(os.walk(dir))
+    yamlFiles = []
+    
+    for yaml in files:
+        if "yaml" = yaml:
+            yamlFiles.append(yaml)
+
+    return yamlFiles
+
+
+ def readYAMLFile(filePath):
+    fileData = open(filePath, 'r')
+    return fileData.read()
+
+
+def fromYAMLString(data):
+    return yaml.load(data)
+
+
+def getCurrentEpisodeFromYaml(yamls, animName):
+    pos = 0    
+    for yaml in yamls:
+        data = readYAMLFile(yaml)
+        animObject = fromYAMLString(data)
+
+        # check if the file has the correct name
+        if animObject.memName = animName:
+            # we have the correct anime json file found
+            pos = animObject.memCurrent
+        else:
+            pos = -1 # shows that there were no pos entries found.
+
+    return pos
+
 
 def moveVideosToSelectedDir(dir):
     files = getVideoFileList(os.getcwd())
@@ -64,5 +118,7 @@ def getDownloadFromUrl(url):
 
     # once the files have been downloaded move them to the correct directory
     moveVideosToSelectedDir(currentAnimeName)
+
+
 
 getDownloadFromUrl(targetSeriesURL)
