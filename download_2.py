@@ -71,7 +71,7 @@ def getCurrentEpisodeFromYaml(yamls, animName):
 def updateYAMLFile(animName, animLength, currentPos):
     data = generateYAMLString(animName, animLength, currentPos)
     newName = animName.replace(" ", "-")
-    print("Updating YAML cache file. {}".format(newName + ".yaml"))
+    print("Updating YAML cache file: {}".format(newName + ".yaml"))
     writeYAMLStringToFile(newName, data)
 
 
