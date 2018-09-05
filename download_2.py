@@ -22,7 +22,7 @@ def getVideoFileList(dir):
 
 
 def writeYAMLStringToFile(name, string):
-    with open(name + '.yaml', "w+") as textFile:
+    with open(name + ".yaml", "w+") as textFile:
         textFile.write(string)
 
 
@@ -144,7 +144,8 @@ def normalDownload(episodes, currentAnime, name):
         except:
             print("Failed to download {}. Please download it manually!".format(currentAnime[x].pretty_title))
 
-        redownload = []
+    # is this even necessary ?
+    redownload = []
 
 
 def downloadFromPos(episodes, currentAnime, name, pos):
@@ -173,6 +174,7 @@ def downloadFromPos(episodes, currentAnime, name, pos):
         except:
             print("Failed to download {}. Please download it manually!".format(currentAnime[x].pretty_title))
 
+    # is this even necessary
     redownload = []
 
 
