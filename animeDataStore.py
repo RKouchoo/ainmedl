@@ -1,7 +1,7 @@
 
 class animeInfo:
 
-	def __init__(self, animeName, animeLength, current):
-		self.memName = name
-		self.memLength = length
-		self.memCurrent = current
+	def __init__(self, animeName, animeLength, animeCurrent):
+		self.memName = animeName
+		self.memLength = animeLength
+		self.memCurrent = animeCurrent

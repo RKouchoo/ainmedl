@@ -35,9 +35,9 @@ def generateYAMLString(animName, animLength, current):
 def checkForAnimeYamlFile(dir):
     path, dirs, files = next(os.walk(dir))
     yamlFiles = []
-    
+
     for yaml in files:
-        if "yaml" == yaml:
+        if ".yaml" in yaml:
             yamlFiles.append(yaml)
 
     return yamlFiles
@@ -53,7 +53,7 @@ def fromYAMLString(data):
 
 
 def getCurrentEpisodeFromYaml(yamls, animName):
-    pos = 0    
+    pos = 0
     for yaml in yamls:
         data = readYAMLFile(yaml)
         animObject = fromYAMLString(data)
@@ -63,9 +63,16 @@ def getCurrentEpisodeFromYaml(yamls, animName):
             # we have the correct anime json file found
             pos = animObject.memCurrent
         else:
-            pos = -1 # shows that there were no pos entries found.
+            pos = -1  # shows that there were no pos entries found.
 
     return pos
+
+
+def updateYAMLFile(animName, animLength, currentPos):
+    data = generateYAMLString(animName, animLength, currentPos)
+    newName = animName.replace(" ", "-")
+    print("Updating YAML cache file. {}".format(newName + ".yaml"))
+    writeYAMLStringToFile(newName, data)
 
 
 def moveVideosToSelectedDir(dir):
@@ -88,78 +95,84 @@ def getDownloadFromUrl(url):
     currentAnimeName = currentAnime.title
 
     episodes = len(currentAnime)
-    files = checkForAnimeYamlFile("/")
+    files = checkForAnimeYamlFile(os.getcwd())
 
-    if files:
-        episodeNum = getCurrentEpisodeFromYaml(files, currentAnime)
+    if currentAnimeName.replace(" ", "-") + ".yaml" in files:
+        episodeNum = getCurrentEpisodeFromYaml(files, currentAnimeName)
     else:
         episodeNum = -1
 
     print("Found {} videos in this series to download. \n".format(episodes))
-    print("Downloading {} episdoes. This may take some time!".format(episodes - abs(episodeNum)))
+    print("Downloading {} episdoes. This may take some time!".format(episodes))
 
-    if episodeNum == -1:
-        normalDownload(episodes, currentAnime)
-        # do a normal download as there is not a cache file here
-
+    if episodeNum == -1 or episodeNum == 0:
+        print("Starting a new download session for `{}`".format(currentAnimeName))
+        normalDownload(episodes, currentAnime, currentAnimeName)
+    # do a normal download as there is not a cache file here
     else:
-        downloadFromPos(episodes, currentAnime, episodeNum)
+        print("Resuming download session for `{}` at episode: {}".format(currentAnimeName, episodeNum))
+        downloadFromPos(episodes, currentAnime, currentAnimeName, episodeNum)
         # download from the current episode, rewriting the latest one just incase it is corrupt.
 
-   
     # once the files have been downloaded move them to the correct directory
     moveVideosToSelectedDir(currentAnimeName)
 
 
-def normalDownload(episodes, currentAnime):
+def normalDownload(episodes, currentAnime, name):
     redownload = []
-    
+
     # for every episode we want to download it
     for i in range(0, episodes):
         title = currentAnime[i].pretty_title
         print("Downloading episode ({} of {}). Name: {}".format(currentAnime[i].ep_no, episodes, title))
+
         try:
             currentAnime[i].download()  # download the episode to the current drectory.
         except:
             print("Encountered an error downloading the video: {}. Adding {} to be re-downloaded".format(title, title))
             redownload.append(i)
+        updateYAMLFile(name, episodes, i)
 
-        # INDENT BUG HERE
-        # redownload failed videos. If they fail again then they aren't going to be dowloaded
-        # might implement a persistent loop  
-        for x in redownload:
-            print("[RETRY]: Downloading episode ({} of {}). Name: {}".format(currentAnime[x].ep_no, episodes, currentAnime[x].pretty_title))
-            try:
-                currentAnime[x].download()
-            except:
-                print("Failed to download {}. Please download it manually!".format(currentAnime[x].pretty_title))
+    # redownload failed videos. If they fail again then they aren't going to be dowloaded
+    # might implement a persistent loop  
+    for x in redownload:
+        print("[RETRY]: Downloading episode ({} of {}). Name: {}".format(currentAnime[x].ep_no, episodes,
+                                                                         currentAnime[x].pretty_title))
+        try:
+            currentAnime[x].download()
+            updateYAMLFile(currentAnimeName, episodes, x)
+        except:
+            print("Failed to download {}. Please download it manually!".format(currentAnime[x].pretty_title))
 
         redownload = []
 
-def downloadFromPos(episdoes, currentAnime, pos):
+
+def downloadFromPos(episodes, currentAnime, name, pos):
     redownload = []
-    
+
     # for every episode from the start pos we want to download it
-    for i in range(pos, episodes):
+    for i in range(pos - 1, episodes):
         title = currentAnime[i].pretty_title
         print("Downloading episode ({} of {}). Name: {}".format(currentAnime[i].ep_no, episodes, title))
         try:
             currentAnime[i].download()  # download the episode to the current drectory.
+            updateYAMLFile(name, episodes, i)
         except:
             print("Encountered an error downloading the video: {}. Adding {} to be re-downloaded".format(title, title))
             redownload.append(i)
 
-        # INDENT BUG HERE
         # redownload failed videos. If they fail again then they aren't going to be dowloaded
-        # might implement a persistent loop  
+        # might implement a persistent loop
         for x in redownload:
-            print("[RETRY]: Downloading episode ({} of {}). Name: {}".format(currentAnime[x].ep_no, episodes, currentAnime[x].pretty_title))
+            print("[RETRY]: Downloading episode ({} of {}). Name: {}".format(currentAnime[x].ep_no, episodes,
+                                                                             currentAnime[x].pretty_title))
             try:
                 currentAnime[x].download()
+                updateYAMLFile(name, episodes, x)
             except:
                 print("Failed to download {}. Please download it manually!".format(currentAnime[x].pretty_title))
 
-            redownload = []
+        redownload = []
 
 
 getDownloadFromUrl(targetSeriesURL)
