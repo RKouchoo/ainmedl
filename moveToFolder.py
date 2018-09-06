@@ -18,13 +18,15 @@ def getVideoFileList(dir):
 
     return videoFiles
 
+# reads in the
 def readYAMLFile(filePath):
     fileData = open(filePath, 'r')
     return fileData.read()
 
+def fromYAMLString(data):
+    return yaml.load(data)
 
-animData = readYAMLFile(destYAML)
-
+# moves the videos from the current directory into a new folder
 def moveVideosToSelectedDir(dir):
     files = getVideoFileList(os.getcwd())
 
@@ -37,6 +39,8 @@ def moveVideosToSelectedDir(dir):
         print("Moving {} to {}".format(file, dir + "/" + file))
         os.rename(file, dir + "/" + file)  # try and move the file to the directory
 
-folderName = animData.memName.replace(" ", "-") 
-
+# main method calls here
+animData = readYAMLFile(os.getcwd() + destYAML)
+animObject = fromYAMLString(animData)
+folderName = animObject.memName.replace(" ", "-") 
 moveVideosToSelectedDir(folderName)
