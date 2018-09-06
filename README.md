@@ -30,7 +30,7 @@ If we stopped downloading the series `http://kissanime.ru/Anime/Violet-Evergarde
     Evergarden (Sub)}
 `
 
-You are able to change the value of memCurrent to start downloading from another episode.
+You are able to change the value of `memCurrent` to start downloading from another episode if need be.
 
 In this case the cache file is called: `Violet-Evergarden-(Sub).yaml`
 
