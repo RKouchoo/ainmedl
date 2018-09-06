@@ -1,7 +1,7 @@
 # ainmedl
 Got sick of sending wget requests to my home server.. This is a script to download a whole graphic novel series in one go from the site http://www.kissanime.ru/
 
-## requirements
+## Requirements
 - pyyaml
 - requests
 - anime_downloader[cloudflare]
@@ -32,5 +32,6 @@ You are able to change the value of memCurrent to start downloading from another
 
 In this case the cache file is called: `Violet-Evergarden-(Sub).yaml`
 
-Thats all you have to pass in to the move tool..
+Thats all you have to pass in to the move tool so a final command would look like:
+`python moveToFolder.py Violet-Evergarden-(Sub).yaml`
 
