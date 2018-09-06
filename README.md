@@ -4,8 +4,9 @@ Got sick of sending wget requests to my home server.. This is a script to downlo
 ## Requirements
 - pyyaml
 - requests
-- anime_downloader[cloudflare]
+- anime_downloader[cloudflare] <- install like this
 - cfscrape
+- BeautifulSoup (latest)
 
 Just install those in order via pip and you should be good.
 
