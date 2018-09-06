@@ -4,9 +4,10 @@ import os
 import yaml
 from sys import argv
 
-import animeDataStore
+import animeDataStore # need this here so yaml knows what to refrence
 
 destYAML = argv[1]
+
 
 def getVideoFileList(dir):
     path, dirs, files = next(os.walk(dir))
@@ -18,13 +19,17 @@ def getVideoFileList(dir):
 
     return videoFiles
 
+
 # reads in the
 def readYAMLFile(filePath):
     fileData = open(filePath, 'r')
     return fileData.read()
 
+
+# returns an object after it is parsed though yaml
 def fromYAMLString(data):
     return yaml.load(data)
+
 
 # moves the videos from the current directory into a new folder
 def moveVideosToSelectedDir(dir):
@@ -38,6 +43,7 @@ def moveVideosToSelectedDir(dir):
     for file in files:
         print("Moving {} to {}".format(file, dir + "/" + file))
         os.rename(file, dir + "/" + file)  # try and move the file to the directory
+
 
 # main method calls here
 animData = readYAMLFile(os.getcwd() + destYAML)
