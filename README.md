@@ -19,7 +19,7 @@ For moving files with the auto script:
 
 `python moveToFolder.py <CAHCE YAML FILE>`
 
-With every series download a cache file is created so the current episode that is being downloaded.
+With every series download a cache file is created so the current episode that is being downloaded is saved. This allows the tool to not be dumb and re-download every episode :D
 
 If we stopped downloading the series `http://kissanime.ru/Anime/Violet-Evergarden` at episode 5 the data in the yaml file would look like this:
 
