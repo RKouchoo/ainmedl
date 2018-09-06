@@ -10,14 +10,17 @@ Got sick of sending wget requests to my home server.. This is a script to downlo
 Just install those in order via pip and you should be good.
 
 ## Usage
-`python ainmeDownloader.py <YOUR LINK HERE>` 
+`python ainmeDownloader.py <YOURLINK>` 
 
 An example of the link could be:
 `http://kissanime.ru/Anime/Violet-Evergarden`
 
+So that would become:
+`python ainmeDownloader.py http://kissanime.ru/Anime/Violet-Evergarden` 
+
 For moving files with the auto script:
 
-`python moveToFolder.py <CAHCE YAML FILE>`
+`python moveToFolder.py <CACHE YAML FILE>`
 
 With every series download a cache file is created so the current episode that is being downloaded is saved. This allows the tool to not be dumb and re-download every episode :D
 
